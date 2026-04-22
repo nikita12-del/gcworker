@@ -71,7 +71,7 @@
     let parsedData = [];
 
     // Fetch CSV
-    fetch("YOUR_GOOGLE_SHEET_CSV_LINK_HERE")
+    fetch("https://nikita12-del.github.io/gcworker/data.csv")
       .then(res => res.text())
       .then(csvText => {
         let parsed = Papa.parse(csvText, { header: false });
