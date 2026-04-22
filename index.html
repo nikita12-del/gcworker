@@ -116,9 +116,45 @@
 
     // On name select → show profile
     document.getElementById("nameFilter").addEventListener("change", () => {
-      let selectedName = document.getElementById("nameFilter").value;
-      let row = parsedData.find((r, idx) => idx !== 0 && r[2] === selectedName);
-      showEmployeeDetail(row);
+      function formatDate(input) {
+  // input: dd/mm/yyyy
+  let parts = input.split("/");
+  let day = parts[0];
+  let monthNum = parts[1];
+  let year = parts[2];
+
+  let months = ["January","February","March","April","May","June",
+                "July","August","September","October","November","December"];
+  let monthName = months[parseInt(monthNum)-1];
+
+  return `${day} ${monthName} ${year}`;
+}
+
+document.getElementById("applyWork").addEventListener("click", () => {
+  let selectedDateRaw = document.getElementById("workDate").value.trim();
+  let selectedDate = formatDate(selectedDateRaw); // convert to CSV format
+  let selectedName = document.getElementById("nameFilter").value;
+
+  let filtered = parsedData.filter((row, idx) => {
+    if (idx === 0) return false;
+    return row[0].trim() === selectedDate && row[2] === selectedName;
+  });
+
+  let workDiv = document.getElementById("workDetail");
+  if (filtered.length > 0) {
+    let row = filtered[0];
+    workDiv.innerHTML = `
+      <h3>Work Detail</h3>
+      <p><strong>Date:</strong> ${row[0]}</p>
+      <p><strong>Location:</strong> ${row[7]}</p>
+      <p><strong>Activity Planned:</strong> ${row[8]}</p>
+      <p><strong>Status:</strong> ${row[9]}</p>
+    `;
+  } else {
+    workDiv.innerHTML = "<h3>Work Detail</h3><p>No record found. Check date format.</p>";
+  }
+});
+
     });
 
     // Work Detail (date filter)
