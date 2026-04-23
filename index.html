@@ -128,13 +128,36 @@
     });
 
     function renderWork(filtered){
-      let div=document.getElementById("workDetail");
-      if(filtered.length===0){ div.innerHTML="<h3>Work Detail</h3><p>No records found.</p>"; return; }
-      div.innerHTML="<h3>Work Detail</h3><table><tr><th>Name</th><th>Date</th><th>Location</th><th>Activity</th><th>Status</th></tr>";
-      filtered.forEach(r=>{
-        div.innerHTML+=`<tr><td>${r[2]}</td><td>${r[0]}</td><td>${r[7]}</td><td>${r[8]}</td><td>${r[9]}</td></tr>`;
-      });
-      div.innerHTML+="</table>";
+  let div = document.getElementById("workDetail");
+  if(filtered.length === 0){
+    div.innerHTML = "<h3>Work Detail</h3><p>No records found.</p>";
+    return;
+  }
+
+  // Table with only Location, Activity, Status
+  div.innerHTML = `
+    <h3>Work Detail</h3>
+    <table>
+      <tr>
+        <th>Location</th>
+        <th>Activity</th>
+        <th>Status</th>
+      </tr>
+  `;
+
+  filtered.forEach(r => {
+    div.innerHTML += `
+      <tr>
+        <td>${r[7]}</td>
+        <td>${r[8]}</td>
+        <td>${r[9]}</td>
+      </tr>
+    `;
+  });
+
+  div.innerHTML += "</table>";
+}
+
     }
   </script>
 </body>
