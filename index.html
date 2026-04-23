@@ -114,11 +114,12 @@
         <p><strong>Contractor:</strong> ${row[6]}</p>
       `;
     }
-
-    // Format date helper
-    function formatDate(input) {
-      let parts = input.split("/");
-      if (parts.length !== 3) return input;
+// Format date helper
+function formatDate(input) {
+  // Agar input dd/mm/yyyy hai
+  if (input.includes("/")) {
+    let parts = input.split("/");
+    if (parts.length === 3) {
       let day = parts[0];
       let monthNum = parts[1];
       let year = parts[2];
@@ -127,7 +128,10 @@
       let monthName = months[parseInt(monthNum)-1];
       return `${day} ${monthName} ${year}`;
     }
-
+  }
+  // Agar input already "23 April 2026" format me hai
+  return input.trim();
+}
     // Show Work Detail dynamically
     document.getElementById("applyWork").addEventListener("click", () => {
       let selectedDateRaw = document.getElementById("workDate").value.trim();
