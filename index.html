@@ -3,46 +3,47 @@
 <head>
   <meta charset="UTF-8">
   <title>Daily Report Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    body { font-family: 'Segoe UI', Arial, sans-serif; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; margin:0; padding:0; }
     h2 {
       text-align:center;
       background: linear-gradient(90deg, #2980b9, #6dd5fa);
-      color:#fff;
-      padding:14px;
-      border-radius:8px;
-      margin-bottom:15px;
-      font-weight:bold;
-      letter-spacing:1px;
-      box-shadow:0 4px 6px rgba(0,0,0,0.2);
+      color:#fff; padding:14px; border-radius:8px; margin-bottom:15px;
+      font-weight:bold; letter-spacing:1px; box-shadow:0 4px 6px rgba(0,0,0,0.2);
     }
-    .container {
-      display:flex;
-      justify-content:space-around;
-      margin-top:20px;
-    }
-    .block {
-      width:45%;
-      border:1px solid #ccc;
-      padding:15px;
-      border-radius:8px;
-      box-shadow:0 2px 4px rgba(0,0,0,0.1);
-    }
-    .block h3 {
-      color:#2980b9;
-      margin-bottom:10px;
-    }
+    h2 img { height:50px; vertical-align:middle; margin-right:10px; }
+    .container { display:flex; flex-wrap:wrap; justify-content:space-around; margin-top:20px; }
+    .block { flex:1 1 45%; border:1px solid #ccc; padding:15px; margin:10px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1); }
+    .block h3 { color:#2980b9; margin-bottom:10px; }
+    table { width:100%; border-collapse:collapse; margin-top:10px; }
+    th, td { border:1px solid #ccc; padding:8px; text-align:left; }
+    th { background:#2980b9; color:#fff; }
+    @media(max-width:768px){ .block{flex:1 1 100%;} }
   </style>
 </head>
 <body>
-  <h2>Daily Report Dashboard</h2>
+  <h2>
+    <img src="metro-track-logo.png" alt="Metro Logo"> Daily Report Dashboard
+  </h2>
 
   <!-- Filters -->
   <div style="text-align:center; margin-bottom:20px;">
     <label for="nameFilter">Select Employee:</label>
     <select id="nameFilter">
       <option value="">-- Select Name --</option>
+      <option value="ALL">-- All Employees --</option>
     </select>
+    <br><br>
+    <label for="workDate">Single Date:</label>
+    <input type="text" id="workDate" placeholder="dd/mm/yyyy">
+    <button id="applyWork">Show Detail</button>
+    <br><br>
+    <label for="fromDate">From:</label>
+    <input type="text" id="fromDate" placeholder="dd/mm/yyyy">
+    <label for="toDate">To:</label>
+    <input type="text" id="toDate" placeholder="dd/mm/yyyy">
+    <button id="applyRange">Show Range</button>
   </div>
 
   <!-- Two Blocks -->
@@ -50,22 +51,16 @@
     <div id="employeeDetail" class="block">
       <h3>Employee Profile</h3>
     </div>
-
     <div id="workDetail" class="block">
       <h3>Work Detail</h3>
-      <label for="workDate">Select Date:</label>
-      <input type="text" id="workDate" placeholder="dd/mm/yyyy">
-      <button id="applyWork">Show Detail</button>
     </div>
   </div>
 
   <!-- PapaParse -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-
   <script>
     let parsedData = [];
 
-    // Fetch CSV
     fetch("https://nikita12-del.github.io/gcworker/data.csv")
       .then(res => res.text())
       .then(csvText => {
@@ -74,90 +69,73 @@
         populateNames(parsedData);
       });
 
-    // Populate dropdown with names
     function populateNames(data) {
       let nameSet = new Set();
-      data.forEach((row, idx) => {
-        if (idx === 0) return; // skip header
-        if (row[2]) nameSet.add(row[2]);
-      });
+      data.forEach((row, idx) => { if (idx!==0 && row[2]) nameSet.add(row[2]); });
       let select = document.getElementById("nameFilter");
-      select.innerHTML = '<option value="">-- Select Name --</option>';
+      select.innerHTML = '<option value="">-- Select Name --</option><option value="ALL">-- All Employees --</option>';
       nameSet.forEach(name => {
-        let opt = document.createElement("option");
-        opt.value = name;
-        opt.textContent = name;
-        select.appendChild(opt);
+        let opt = document.createElement("option"); opt.value=name; opt.textContent=name; select.appendChild(opt);
       });
     }
 
-    // Show Employee Profile dynamically
-    document.getElementById("nameFilter").addEventListener("change", () => {
-      let selectedName = document.getElementById("nameFilter").value;
-      let row = parsedData.find((r, idx) => idx !== 0 && r[2] === selectedName);
+    function showEmployeeDetail(row) {
+      let div = document.getElementById("employeeDetail");
+      if (!row) { div.innerHTML="<h3>Employee Profile</h3>"; return; }
+      div.innerHTML = `
+        <h3>Employee Profile</h3>
+        <p><i class="fa fa-user"></i> <strong>Name:</strong> ${row[2]}</p>
+        <p><i class="fa fa-briefcase"></i> <strong>Designation:</strong> ${row[3]}</p>
+        <p><i class="fa fa-money-bill"></i> <strong>Package:</strong> ${row[5]}</p>
+        <p><i class="fa fa-train"></i> <strong>Metro Line:</strong> ${row[1]}</p>
+        <p><i class="fa fa-building"></i> <strong>General Consultant:</strong> ${row[4]}</p>
+        <p><i class="fa fa-handshake"></i> <strong>Contractor:</strong> ${row[6]}</p>
+      `;
+    }
+
+    function formatDate(input){
+      if(input.includes("/")){
+        let [d,m,y]=input.split("/");
+        let months=["January","February","March","April","May","June","July","August","September","October","November","December"];
+        return `${d} ${months[parseInt(m)-1]} ${y}`;
+      }
+      return input.trim();
+    }
+
+    document.getElementById("nameFilter").addEventListener("change",()=>{
+      let name=document.getElementById("nameFilter").value;
+      let row=parsedData.find((r,i)=>i!==0 && r[2]===name);
       showEmployeeDetail(row);
     });
 
-    function showEmployeeDetail(row) {
-      let detailDiv = document.getElementById("employeeDetail");
-      if (!row) {
-        detailDiv.innerHTML = "<h3>Employee Profile</h3>";
-        return;
-      }
-      detailDiv.innerHTML = `
-        <h3>Employee Profile</h3>
-        <p><strong>Name:</strong> ${row[2]}</p>
-        <p><strong>Designation:</strong> ${row[3]}</p>
-        <p><strong>Package:</strong> ${row[5]}</p>
-        <p><strong>Metro Line:</strong> ${row[1]}</p>
-        <p><strong>General Consultant:</strong> ${row[4]}</p>
-        <p><strong>Contractor:</strong> ${row[6]}</p>
-      `;
-    }
-// Format date helper
-function formatDate(input) {
-  // Agar input dd/mm/yyyy hai
-  if (input.includes("/")) {
-    let parts = input.split("/");
-    if (parts.length === 3) {
-      let day = parts[0];
-      let monthNum = parts[1];
-      let year = parts[2];
-      let months = ["January","February","March","April","May","June",
-                    "July","August","September","October","November","December"];
-      let monthName = months[parseInt(monthNum)-1];
-      return `${day} ${monthName} ${year}`;
-    }
-  }
-  // Agar input already "23 April 2026" format me hai
-  return input.trim();
-}
-    // Show Work Detail dynamically
-    document.getElementById("applyWork").addEventListener("click", () => {
-      let selectedDateRaw = document.getElementById("workDate").value.trim();
-      let selectedDate = formatDate(selectedDateRaw);
-      let selectedName = document.getElementById("nameFilter").value;
-
-      let filtered = parsedData.filter((row, idx) => {
-        if (idx === 0) return false;
-        return row[0].trim() === selectedDate && row[2] === selectedName;
-      });
-
-      let workDiv = document.getElementById("workDetail");
-      if (filtered.length > 0) {
-        let row = filtered[0];
-        workDiv.innerHTML = `
-          <h3>Work Detail</h3>
-          <p><strong>Date:</strong> ${row[0]}</p>
-          <p><strong>Location:</strong> ${row[7]}</p>
-          <p><strong>Activity Planned:</strong> ${row[8]}</p>
-          <p><strong>Status:</strong> ${row[9]}</p>
-        `;
-      } else {
-        workDiv.innerHTML = "<h3>Work Detail</h3><p>No record found. Check date format.</p>";
-      }
+    document.getElementById("applyWork").addEventListener("click",()=>{
+      let date=formatDate(document.getElementById("workDate").value.trim());
+      let name=document.getElementById("nameFilter").value;
+      let filtered=parsedData.filter((row,i)=>i!==0 && row[0].trim()===date && (name==="ALL"||row[2]===name));
+      renderWork(filtered);
     });
+
+    document.getElementById("applyRange").addEventListener("click",()=>{
+      let from=new Date(formatDate(document.getElementById("fromDate").value.trim()));
+      let to=new Date(formatDate(document.getElementById("toDate").value.trim()));
+      let name=document.getElementById("nameFilter").value;
+      let filtered=parsedData.filter((row,i)=>{
+        if(i===0) return false;
+        let rd=new Date(row[0]);
+        return (name==="ALL"||row[2]===name) && rd>=from && rd<=to;
+      });
+      renderWork(filtered);
+    });
+
+    function renderWork(filtered){
+      let div=document.getElementById("workDetail");
+      if(filtered.length===0){ div.innerHTML="<h3>Work Detail</h3><p>No records found.</p>"; return; }
+      div.innerHTML="<h3>Work Detail</h3><table><tr><th>Name</th><th>Date</th><th>Location</th><th>Activity</th><th>Status</th></tr>";
+      filtered.forEach(r=>{
+        div.innerHTML+=`<tr><td>${r[2]}</td><td>${r[0]}</td><td>${r[7]}</td><td>${r[8]}</td><td>${r[9]}</td></tr>`;
+      });
+      div.innerHTML+="</table>";
+    }
   </script>
 </body>
 </html>
-
