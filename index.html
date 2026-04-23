@@ -24,7 +24,7 @@
 </head>
 <body>
   <h2>
-    <img src="metro-track-logo.png" alt="Metro Logo"> Daily Report Dashboard
+    <img src="metro-track-logo.png" alt=""> Daily Report Dashboard
   </h2>
 
   <!-- Filters -->
@@ -126,8 +126,7 @@
       });
       renderWork(filtered);
     });
-
-    function renderWork(filtered){
+function renderWork(filtered){
   let div = document.getElementById("workDetail");
   if(filtered.length === 0){
     div.innerHTML = "<h3>Work Detail</h3><p>No records found.</p>";
@@ -137,26 +136,32 @@
   // Table with only Location, Activity, Status
   div.innerHTML = `
     <h3>Work Detail</h3>
-    <table>
-      <tr>
-        <th>Location</th>
-        <th>Activity</th>
-        <th>Status</th>
-      </tr>
+    <table style="width:100%; border-collapse:collapse; margin-top:10px;">
+      <thead>
+        <tr style="background:#2980b9; color:#fff;">
+          <th style="padding:8px; border:1px solid #ccc;">Location</th>
+          <th style="padding:8px; border:1px solid #ccc;">Activity</th>
+          <th style="padding:8px; border:1px solid #ccc;">Status</th>
+        </tr>
+      </thead>
+      <tbody>
   `;
 
   filtered.forEach(r => {
     div.innerHTML += `
       <tr>
-        <td>${r[7]}</td>
-        <td>${r[8]}</td>
-        <td>${r[9]}</td>
+        <td style="padding:8px; border:1px solid #ccc;">${r[7]}</td>
+        <td style="padding:8px; border:1px solid #ccc;">${r[8]}</td>
+        <td style="padding:8px; border:1px solid #ccc;">${r[9]}</td>
       </tr>
     `;
   });
 
-  div.innerHTML += "</table>";
+  div.innerHTML += "</tbody></table>";
 }
+
+  
+
 
     }
   </script>
